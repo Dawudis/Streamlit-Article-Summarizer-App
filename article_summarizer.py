@@ -1,5 +1,9 @@
 import streamlit as st
 import pandas as pd
+from newspaper import Article
+import nltk
+nltk.download('punkt')
+import re
 
 st.title("Mass Article Extractive Summarizer")
 st.write("1. Import a CSV dataset containing the article URLs you wish to be summarized.")
@@ -14,14 +18,13 @@ if uploaded_file is not None:
   df = pd.read_csv(uploaded_file)
   st.table(df.head())
   def run_model(df):
-    import torchvision
-    from newsplease import NewsPlease
-    from summarizer import Summarizer
-    model = Summarizer()
     data = pd.DataFrame(columns=['Article Summaries'])
     for i in df['urls']:
-      article = NewsPlease.from_url(i).maintext
-      result = model(article, num_sentences = number)
+      article = Article(i)
+      article.download()
+      article.parse()
+      article.nlp()
+      result = ' '.join(re.split(r'(?<=[.:;])\s', article.summary)[:number])
       temporary_df = pd.DataFrame([result], columns = ['Article Summaries'])
       data = data.append(temporary_df, ignore_index=True)
     st.header('Results')
@@ -37,7 +40,7 @@ if uploaded_file is not None:
     )
 
 st.header("Choose the Length of Your Summaries")
-number = st.number_input('Number of Sentences', min_value=1, max_value=10)
+number = st.number_input('Number of Sentences', min_value=1, max_value=5)
 
 if st.button('Summarize'):
   run_model(df)
