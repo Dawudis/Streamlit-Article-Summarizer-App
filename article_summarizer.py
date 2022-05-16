@@ -14,7 +14,6 @@ if uploaded_file is not None:
   df = pd.read_csv(uploaded_file)
   st.table(df.head())
   def run_model(df):
-    import torch
     from newsplease import NewsPlease
     from summarizer import Summarizer
     model = Summarizer()
